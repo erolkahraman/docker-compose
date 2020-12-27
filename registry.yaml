@@ -1,0 +1,28 @@
+version: '3.8'
+# docker run \
+# -d \
+# --restart=always \
+# --name registry \
+# -v /mnt/certs:/certs \
+# -v /mnt/registry:/var/lib/registry \
+# -e REGISTRY_HTTP_TLS_CERTIFICATE=/certs/domain.crt \
+# -e REGISTRY_HTTP_TLS_KEY=/certs/domain.key \
+# -e DELETE_IMAGES=true \
+# -e REGISTRY_STORAGE_DELETE_ENABLED=true \
+# -p 5000:5000 \
+# registry:2
+
+services:
+  registry_test:
+    image: registry:2
+    ports:
+      - "5000:5001"
+    environment:
+      REGISTRY_HTTP_TLS_CERTIFICATE=/certs/domain.crt
+      REGISTRY_HTTP_TLS_KEY=/certs/domain.key
+      REGISTRY_STORAGE_DELETE_ENABLED=true
+      DELETE_IMAGES=true
+    volumes:
+    - /mnt/certs:/certs
+    - /mnt/registry:/var/lib/registry
+    restart: always
