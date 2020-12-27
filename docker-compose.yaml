@@ -32,5 +32,7 @@ services:
     volumes:
     - /mnt/certs:/certs
     - /mnt/registry:/var/lib/registry
-    - /mnt/htpasswd:/auth/htpasswd
+    - type: bind
+      source: /mnt/htpasswd
+      target: /auth/htpasswd
     restart: always
