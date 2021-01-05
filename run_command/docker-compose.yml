@@ -1,0 +1,8 @@
+version: '3.8'
+
+services:
+  ping:
+    image: centos:8
+    command: ping -c 3 localhost
+    container_name: ping01
+    hostname: "deneme"

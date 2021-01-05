@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  deneme:
+    network_mode: 'host'
+    dns: 172.16.0.201
+    build: . 
+#      context: .
+#      dockerfile: Dockerfile
+    container_name: deneme1
+    hostname: localhost    
+    
+  
