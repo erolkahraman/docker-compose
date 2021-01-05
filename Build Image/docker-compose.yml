@@ -1,0 +1,11 @@
+version: 3.8
+
+services:
+  deneme:
+    build: 
+      context: .
+      dockerfile: .
+    container_name: deneme1
+    
+    
+  

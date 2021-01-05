@@ -1,0 +1,15 @@
+version: '3.8'
+# docker run -d --rm \
+# -p access_port:4000 \
+# -v storage_mount_point:/tmp/input_dir/ \
+# skaas/shot-detection-service:1.0
+
+services:
+  yas_shot_detection:
+    env_file: 
+    image: skaas/shot-detection-service:1.0
+    ports:
+      - "$SVC_PORT:4000"
+    volumes:
+    - $MOUNT_POINT:/tmp/input_dir/
+
