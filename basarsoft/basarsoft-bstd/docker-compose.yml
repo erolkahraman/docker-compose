@@ -47,9 +47,9 @@ services:
   ############################################ Streamsets ##############################################################
 
   streamsets:
+    image: 'streamsets/datacollector:latest'
     container_name: streamsets
     hostname: "streamsets"
-    image: 'streamsets/datacollector:latest'
     ports:
       - 18630:18630
     environment:
@@ -57,29 +57,26 @@ services:
       - http.realm.file.permission.check=false
     #volumes:
      # - ./basarsoft-volumes/streamsets/data:/data:rw
-
     networks:
       intranet:
         ipv4_address: 172.21.0.96
-
     #restart: always
 
   ############################################ GEOSERVER ##############################################################
 
   geoserver:
-    container_name: geoServer
-    hostname: "geoServer"
 
     build:
       context: ./basarsoft-geoserver
       dockerfile: dockerfile-geoserver
+    image: registry.sea.net:5000/geoserver:v1
+    container_name: geoServer
+    hostname: "geoServer"
     ports:
       - "8000:8080"
-
     networks:
       intranet:
         ipv4_address: 172.21.0.97
-
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./basarsoft-volumes/geoserver/geoserver_logs:/var/lib/geoserver/data_dir/logs
@@ -94,6 +91,9 @@ services:
     build:
       context: ./basarsoft-kafka
       dockerfile: dockerfile-kafka
+    image: registry.sea.net:5000/kafka:v1
+    container_name: kafkaN1
+    hostname: kafkaN1
     expose:
       - "2181"
       - "9092"
