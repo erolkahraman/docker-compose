@@ -1,0 +1,21 @@
+FROM centos:7
+
+
+ENV JAVA_HOME /usr/lib/jvm/jre-1.8.0-openjdk
+ENV KAFKA_HOME /var/lib/kafka
+ENV KAFKA_CONFIG ${KAFKA_HOME}/conf
+ENV PATH $PATH:$KAFKA_HOME/bin
+RUN echo "nameserver 8.8.8.8" >> /etc/resolv.conf
+RUN echo "minrate=300" >> /etc/yum.conf
+RUN echo "timeout=300" >> /etc/yum.conf
+RUN yum -y update
+RUN yum -y install wget ntp java-1.8.0-openjdk-headless epel-release initscripts
+RUN ntpdate pool.ntp.org
+
+RUN wget  https://ipfs.io/ipns/repo.beartell.eth/apache-kafka/kafka_2.13-2.6.0.tgz -O /tmp/kafka_2.13-2.6.0.tgz 
+RUN tar xvf /tmp/kafka_2.13-2.6.0.tgz -C  /var/lib/ && ln -s /var/lib/kafka_2.13-2.6.0 /var/lib/kafka
+#RUN tail -f /dev/null
+COPY ./server.properties ${KAFKA_HOME}/config/
+COPY ./zookeeper.properties ${KAFKA_HOME}/config/
+COPY ./kafka-entrypoint.sh ${KAFKA_HOME}/bin/
+ENTRYPOINT [ "/bin/bash", "/var/lib/kafka/bin/kafka-entrypoint.sh" ]

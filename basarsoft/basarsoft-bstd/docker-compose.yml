@@ -1,0 +1,128 @@
+version: "3.8"
+
+services:
+  cass_node1:
+    
+    hostname: "cassandra_node1"
+
+    build:
+      context: ./basarsoft-cassandra
+      dockerfile: dockerfile-cassandra
+    
+    container_name: cassandraN1
+    environment:
+      - CASSANDRA_CLUSTER_NAME=uasis-cluster 
+      - CASSANDRA_SEEDS=cass_node1,cass_node2
+
+    ports:
+      - 9042:9042    
+    volumes:
+      - ./basarsoft-volumes/cassandra_n1/data:/bitnami/cassandra/data/data:rw
+      - ./basarsoft-volumes/cassandra_n1/commit_log:/bitnami/cassandra/data/commitlog:rw
+      - ./basarsoft-volumes/cassandra_n1/saved_caches:/bitnami/cassandra/data/saved_caches:rw
+      - ./basarsoft-volumes/cassandra_n1/hints:/bitnami/cassandra/data/hints:rw
+
+    networks:
+      intranet:
+        ipv4_address: 172.21.0.4
+    restart: always
+
+  cass_node2:
+   
+    hostname: "cassandra_node2"
+    container_name: cassandraN2
+
+    build:
+      context: ./basarsoft-cassandra
+      dockerfile: dockerfile-cassandra
+    
+    environment:
+      - CASSANDRA_CLUSTER_NAME=uasis-cluster
+      - CASSANDRA_SEEDS=cass_node1,cass_node2 
+    ports:
+     - 9043:9042
+      
+    volumes:
+      - ./basarsoft-volumes/cassandra_n2/data:/bitnami/cassandra/data/data:rw
+      - ./basarsoft-volumes/cassandra_n2/commit_log:/bitnami/cassandra/data/commitlog:rw
+      - ./basarsoft-volumes/cassandra_n2/saved_caches:/bitnami/cassandra/data/saved_caches:rw
+      - ./basarsoft-volumes/cassandra_n2/hints:/bitnami/cassandra/data/hints:rw
+
+
+    networks:
+      intranet:
+        ipv4_address: 172.21.0.5
+
+    restart: always
+
+  ############################################ Streamsets ##############################################################
+
+  streamsets:
+    container_name: streamsets
+    hostname: "streamsets"
+    image: 'streamsets/datacollector:latest'
+    ports:
+      - 18630:18630
+    environment:
+      - SDC_CONF_http_authentication=form
+      - http.realm.file.permission.check=false
+    #volumes:
+     # - ./basarsoft-volumes/streamsets/data:/data:rw
+
+    networks:
+      intranet:
+        ipv4_address: 172.21.0.96
+
+    #restart: always
+
+
+
+
+
+
+  ############################################ GEOSERVER ##############################################################
+
+  geoserver:
+    container_name: geoServer
+    hostname: "geoServer"
+
+    build:
+      context: ./basarsoft-geoserver
+      dockerfile: dockerfile-geoserver
+    ports:
+      - "8000:8080"
+
+    networks:
+      intranet:
+        ipv4_address: 172.21.0.97
+
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./basarsoft-volumes/geoserver/geoserver_logs:/var/lib/geoserver/data_dir/logs
+      - ./basarsoft-volumes/geoserver/geomesa_logs:/opt/geomesa/logs
+    #      - cass_data:/var/lib/cassandra
+    restart: always
+
+  ############################################ KAFKA ##############################################################
+  kafka:
+    container_name: kafkaN1
+    hostname: kafkaN1
+    build:
+      context: ./basarsoft-kafka
+      dockerfile: dockerfile-kafka
+    expose:
+      - "2181"
+      - "9092"
+    networks:
+      intranet:
+        ipv4_address: 172.21.0.98
+    volumes:
+      - ./basarsoft-volumes/kafkaN1/logs:/var/lib/kafka/logs
+    tty: true
+
+networks:
+  intranet:
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.21.0.0/16

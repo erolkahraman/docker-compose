@@ -1,0 +1,47 @@
+FROM centos:7
+LABEL maintainer = 'BearTell developers info@beartell.com' 
+LABEL RUN="docker run --privileged  -ti -e container=docker --cap-add=SYS_ADMIN -v /sys/fs/cgroup:/sys/fs/cgroup  centos7-systemd /usr/sbin/init"
+
+RUN echo "nameserver 8.8.8.8" >> /etc/resolv.conf
+RUN echo "minrate=300" >> /etc/yum.conf
+
+RUN echo "timeout=300" >> /etc/yum.conf
+ENV JAVA_HOME  /usr/lib/jvm/jre-1.8.0-openjdk
+ENV MAVEN_HOME  /opt/maven
+ENV M2_HOME  /opt/maven
+ENV GEOSERVER_HOME /usr/share/geoserver
+ENV GEOMESA_CASSANDRA_HOME /opt/geomesa-cassandra_2.11-3.1.1-SNAPSHOT
+ENV GEOMESA_CONF_DIR /opt/geomesa-cassandra_2.11-3.1.1-SNAPSHOT/conf
+ENV CASSANDRA_HOME /var/lib/cassandra
+ENV PATH $PATH:$CASSANDRA_HOME/bin:${M2_HOME}/bin:$PATH:$GEOMESA_CASSANDRA_HOME/bin
+
+
+## Base Tools
+RUN yum -y update
+RUN yum -y install wget unzip wget ntp java-1.8.0-openjdk-headless.x86_64 epel-release initscripts net-tools
+
+
+# MAVEN 3.6.3 Installation 
+RUN wget  https://ipfs.io/ipns/repo.beartell.eth/apache-maven/apache-maven-3.6.3-bin.tar.gz -O /tmp/apache-maven-3.6.3-bin.tar.gz
+RUN   tar xvf /tmp/apache-maven-3.6.3-bin.tar.gz -C /opt/ && ln -s /opt/apache-maven-3.6.3 /opt/maven
+
+RUN wget  https://ipfs.io/ipns/repo.beartell.eth/geoserver/geoserver-2.17.0-bin.zip -O /tmp/geoserver-2.17.0-bin.zip
+RUN  unzip /tmp/geoserver-2.17.0-bin.zip -d /usr/share/geoserver
+
+RUN wget  https://ipfs.io/ipns/repo.beartell.eth/geomesa/geomesa-cassandra_2.11-3.1.1-SNAPSHOT.tar.gz -O /tmp/geomesa-cassandra_2.11-3.1.1-SNAPSHOT.tar.gz 
+RUN tar xvf /tmp/geomesa-cassandra_2.11-3.1.1-SNAPSHOT.tar.gz -C /opt/ && ln -s /opt/geomesa-cassandra_2.11-3.1.1-SNAPSHOT /opt/geomesa
+
+COPY ./geomesa_conf_files/application.conf /opt/geomesa/conf/
+COPY ./geomesa_conf_files/basarsoft /opt/geomesa/conf/sfts/
+
+RUN tar -xzvf /opt/geomesa/dist/gs-plugins/geomesa-cassandra-gs-plugin_2.11-3.1.1-SNAPSHOT-install.tar.gz -C /usr/share/geoserver/webapps/geoserver/WEB-INF/lib/
+WORKDIR /opt/geomesa
+SHELL [ "/bin/bash",  "./bin/install-shapefile-support.sh" , "--no-prompt"]
+SHELL ["/bin/bash","./bin/install-dependencies.sh", "/usr/share/geoserver/webapps/geoserver/WEB-INF/lib/"]
+RUN cp /opt/geomesa-cassandra_2.11-3.1.0/dist/gs-plugins/geomesa-process-wps_2.11-3.1.1-SNAPSHOT.jar /usr/share/geoserver/webapps/geoserver/WEB-INF/
+RUN sed -i 's/stdout/ /' /usr/share/geoserver/resources/log4j.properties
+ENTRYPOINT [ "sh", "/usr/share/geoserver/bin/startup.sh" ]  
+
+
+
+
