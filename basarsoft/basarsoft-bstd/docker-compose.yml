@@ -2,18 +2,15 @@ version: "3.8"
 
 services:
   cass_node1:
-    
     hostname: "cassandra_node1"
-
     build:
       context: ./basarsoft-cassandra
       dockerfile: dockerfile-cassandra
-    
+    image: registry.sea.net:5000/cassandra:v1
     container_name: cassandraN1
     environment:
       - CASSANDRA_CLUSTER_NAME=uasis-cluster 
       - CASSANDRA_SEEDS=cass_node1,cass_node2
-
     ports:
       - 9042:9042    
     volumes:
@@ -21,40 +18,32 @@ services:
       - ./basarsoft-volumes/cassandra_n1/commit_log:/bitnami/cassandra/data/commitlog:rw
       - ./basarsoft-volumes/cassandra_n1/saved_caches:/bitnami/cassandra/data/saved_caches:rw
       - ./basarsoft-volumes/cassandra_n1/hints:/bitnami/cassandra/data/hints:rw
-
     networks:
       intranet:
         ipv4_address: 172.21.0.4
     restart: always
-
+#########################################
   cass_node2:
-   
-    hostname: "cassandra_node2"
+#    build:
+#      context: ./basarsoft-cassandra
+#      dockerfile: dockerfile-cassandra
+    image: registry.sea.net:5000/cassandra:v1
     container_name: cassandraN2
-
-    build:
-      context: ./basarsoft-cassandra
-      dockerfile: dockerfile-cassandra
-    
+    hostname: "cassandra_node2"
     environment:
       - CASSANDRA_CLUSTER_NAME=uasis-cluster
       - CASSANDRA_SEEDS=cass_node1,cass_node2 
     ports:
      - 9043:9042
-      
     volumes:
       - ./basarsoft-volumes/cassandra_n2/data:/bitnami/cassandra/data/data:rw
       - ./basarsoft-volumes/cassandra_n2/commit_log:/bitnami/cassandra/data/commitlog:rw
       - ./basarsoft-volumes/cassandra_n2/saved_caches:/bitnami/cassandra/data/saved_caches:rw
       - ./basarsoft-volumes/cassandra_n2/hints:/bitnami/cassandra/data/hints:rw
-
-
     networks:
       intranet:
         ipv4_address: 172.21.0.5
-
     restart: always
-
   ############################################ Streamsets ##############################################################
 
   streamsets:
@@ -74,11 +63,6 @@ services:
         ipv4_address: 172.21.0.96
 
     #restart: always
-
-
-
-
-
 
   ############################################ GEOSERVER ##############################################################
 
