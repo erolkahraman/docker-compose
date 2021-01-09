@@ -1,0 +1,146 @@
+version: '3.8'
+
+services:
+  das-download-scheduler:
+#    build: 
+#      context: 
+#      dockerfile: 
+    env_file: ./l3.env
+    image: uasis/download-scheduler:alpha
+    container_name: das-download-scheduler
+    ports:
+      - "5432:5432"
+    environment:
+      DB_HOST_ADDRESS: ${DB_HOST_ADDRESS}
+      DB_NAME: ${DB_NAME}
+      DB_HOST_PORT: ${DB_HOST_PORT}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+    volumes:
+    - /mnt/uasisdepo:/mnt/uasisdepo
+    restart: always
+    depends_on:
+      - uasis_db
+
+###########################################
+  web-service:
+#    build: 
+#      context: 
+#      dockerfile: 
+    image: uasis/web-service:alfa
+    container_name: web-service
+    ports:
+      - "7777:7777"
+    environment: 
+      PORT: 7777
+      DB_HOST_ADDRESS: ${DB_HOST_ADDRESS}
+      DB_HOST_PORT: ${DB_HOST_PORT}
+      DB_PASSWORD: ${DB_PASSWORD}
+    volumes: 
+      - /mnt/uasisdepo:/mnt/uasisdepo
+
+###########################################
+  user-interface:
+#    build: 
+#      context: 
+#      dockerfile: 
+    image: uasis/user-interface:alfa
+    container_name: user-interface
+    ports:
+      - 7788:7788
+    environment: 
+      PORT: 7788
+      ADDRESS: 192.168.100.160
+      BACKEND: "192.168.100.160:7777"
+
+###########################################
+  uasis_db:
+#    build: 
+#      context:
+#      dockerfile:
+    image: kartoza/postgis
+    container_name: uasis_db
+    ports:
+      - "5432:5432"
+    environment: 
+      POSTGRES_USER: ${PG_USER}
+      POSTGRES_PASS: ${PG_PASS}
+      POSTGRES_DBNAME: ${PG_DBNAME}      
+      ALLOW_IP_RANGE: ${RANGE}
+      --auth: "md5"
+    volumes: 
+      - /root/workspace/db:/var/lib/postgresql
+
+###########################################
+  das-query:
+#    build: 
+#      context: 
+#      dockerfile: 
+    image: uasis/query-service:alpha
+    container_name: das-query
+    environment: 
+      DB_HOST_ADDRESS: ${DB_HOST_ADDRESS}
+      DB_NAME: ${DB_NAME}
+      DB_HOST_PORT: ${DB_HOST_PORT}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+    volumes: 
+      - /mnt/uasisdepo:/mnt/uasisdepo
+    depends_on:
+      - uasis_db
+
+###########################################
+  das-download:
+#    build: 
+#      context: 
+#      dockerfile: 
+    image: uasis/download-service:alpha
+    container_name: das-download
+    environment: 
+      DB_HOST_ADDRESS: ${DB_HOST_ADDRESS}
+      DB_NAME: ${DB_NAME}
+      DB_HOST_PORT: ${DB_HOST_PORT}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+    volumes: 
+      - /mnt/uasisdepo:/mnt/uasisdepo
+    depends_on:
+      - uasis_db
+
+###########################################
+  l3-stage2:
+#    build: 
+#      context: 
+#      dockerfile: 
+    env_file: ./l3.env
+    image: uasis/l3-stage2:alfa
+    container_name: l3-stage2
+    environment: 
+      DB_HOST_ADDRESS: ${DB_HOST_ADDRESS}
+      DB_NAME: ${DB_NAME}
+      DB_HOST_PORT: ${DB_HOST_PORT}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+    volumes: 
+      - /mnt/uasisdepo:/mnt/uasisdepo
+    depends_on:
+      - uasis_db
+
+###########################################
+  l3-processor:
+#    build: 
+#      context: 
+#      dockerfile: 
+    env_file: ./l3.env
+    image: uasis/l3-processor:alfa
+    container_name: l3-stage2
+    environment: 
+      DB_HOST_ADDRESS: ${DB_HOST_ADDRESS}
+      DB_NAME: ${DB_NAME}
+      DB_HOST_PORT: ${DB_HOST_PORT}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+    volumes: 
+      - /mnt/uasisdepo:/mnt/uasisdepo
+    depends_on:
+      - uasis_db
