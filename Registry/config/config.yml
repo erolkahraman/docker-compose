@@ -3,6 +3,8 @@ log:
   fields:
     service: registry
 storage:
+  delete:
+    enabled: true
   cache:
     blobdescriptor: inmemory
   filesystem:
@@ -11,6 +13,9 @@ http:
   addr: :5000
   headers:
     X-Content-Type-Options: [nosniff]
+    Access-Control-Allow-Origin: ['*']
+    Access-Control-Allow-Methods: ['HEAD', 'GET', 'OPTIONS', 'DELETE']
+    Access-Control-Expose-Headers: ['Docker-Content-Digest']
 health:
   storagedriver:
     enabled: true
