@@ -8,6 +8,7 @@ services:
       - "5000:5000"
     volumes:
       - ./certs:/certs
+      - ./config/config.yml:/etc/docker/registry/config.yml
     environment:
       - REGISTRY_HTTP_TLS_CERTIFICATE=/certs/domain.crt
       - REGISTRY_HTTP_TLS_KEY=/certs/domain.key
